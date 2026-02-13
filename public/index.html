@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>SecretSweep | Credential Leak Scanner</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#111111",
+            "accent": "#111111",
+            "bg": "#f5f5f0",
+            "bg-card": "#ffffff",
+            "bg-input": "#f0f0eb",
+            "border-main": "#e0e0d8",
+            "border-hover": "#c0c0b8",
+            "text-primary": "#111111",
+            "text-secondary": "#555555",
+            "text-muted": "#999999",
+            "severity-critical": "#dc2626",
+            "severity-high": "#ea580c",
+            "severity-medium": "#ca8a04",
+            "severity-low": "#2563eb",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e0e0d8;
+      border-radius: 12px;
+    }
+
+    .card:hover {
+      border-color: #c0c0b8;
+    }
+
+    .code-block {
+      background: #111111;
+      font-family: 'JetBrains Mono', monospace;
+      color: #d4d4d4;
+    }
+
+    .scan-btn-main {
+      background: #111111;
+      color: #f5f5f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .scan-btn-main:hover {
+      background: #222222;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .scan-btn-main:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .progress-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e0e0d8;
+      border-top-color: #111111;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    input:focus {
+      border-color: #111111 !important;
+      box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.08) !important;
+    }
+
+    select {
+      appearance: auto;
+    }
+  </style>
+</head>
+
+<body class="bg-bg text-text-primary min-h-screen font-display">
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-border-main">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+          <span class="material-icons text-white text-xl">security</span>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight text-primary flex items-center gap-2">
+            SecretSweep
+            <span
+              class="text-[10px] uppercase tracking-widest bg-primary/5 text-primary border border-primary/15 px-2 py-0.5 rounded-full font-bold">Pro</span>
+          </h1>
+          <p class="text-[11px] text-text-muted uppercase tracking-wider font-medium">Credential Leak Scanner</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-full">
+          <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          <span class="text-xs font-medium text-text-secondary" id="ruleCount">45 detection rules active</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+    <!-- Scan Configuration Card -->
+    <section class="relative">
+      <div class="card p-0 overflow-hidden">
+        <div class="flex border-b border-border-main" id="sourceTabs">
+          <button
+            class="source-tab px-6 py-4 text-sm font-semibold border-b-2 border-primary text-primary flex items-center gap-2"
+            data-source="local">
+            <span class="material-icons text-sm">folder</span> Local Path
+          </button>
+          <button
+            class="source-tab px-6 py-4 text-sm font-medium text-text-muted hover:text-primary transition-colors flex items-center gap-2 border-b-2 border-transparent"
+            data-source="github">
+            <span class="material-icons text-sm">storage</span> GitHub
+          </button>
+          <button
+            class="source-tab px-6 py-4 text-sm font-medium text-text-muted hover:text-primary transition-colors flex items-center gap-2 border-b-2 border-transparent"
+            data-source="azure-devops">
+            <span class="material-icons text-sm">cloud</span> Azure DevOps
+          </button>
+        </div>
+
+        <form id="scanForm">
+          <div class="p-8">
+            <!-- Local Path Fields -->
+            <div class="form-fields" id="localFields">
+              <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1 relative">
+                  <label class="block text-[10px] uppercase text-text-muted font-bold mb-2 ml-1 tracking-wider">Target
+                    Directory</label>
+                  <div class="relative group">
+                    <span
+                      class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">folder_open</span>
+                    <input id="localPath"
+                      class="w-full bg-bg-input border border-border-main rounded-lg py-3.5 pl-12 pr-4 text-text-primary focus:outline-none transition-all placeholder:text-text-muted font-mono text-sm"
+                      placeholder="C:\Projects\my-app or /home/user/project" type="text" autocomplete="off" />
+                  </div>
+                </div>
+                <div class="flex items-end">
+                  <button type="submit" id="scanBtn"
+                    class="scan-btn-main px-8 py-3.5 rounded-lg font-bold flex items-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <span class="material-icons">radar</span>
+                    <span id="scanBtnText">START SCAN</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- GitHub Fields -->
+            <div class="form-fields hidden" id="githubFields">
+              <div class="space-y-4">
+                <div>
+                  <label
+                    class="block text-[10px] uppercase text-text-muted font-bold mb-2 ml-1 tracking-wider">Repository
+                    URL</label>
+                  <div class="relative">
+                    <span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">link</span>
+                    <input id="githubUrl"
+                      class="w-full bg-bg-input border border-border-main rounded-lg py-3.5 pl-12 pr-4 text-text-primary focus:outline-none transition-all placeholder:text-text-muted font-mono text-sm"
+                      placeholder="https://github.com/owner/repo" type="text" autocomplete="off" />
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[10px] uppercase text-text-muted font-bold mb-2 ml-1 tracking-wider">Personal
+                    Access Token
+                    <span class="normal-case text-text-muted">(optional for public repos)</span></label>
+                  <div class="relative">
+                    <span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">key</span>
+                    <input id="githubPat"
+                      class="w-full bg-bg-input border border-border-main rounded-lg py-3.5 pl-12 pr-4 text-text-primary focus:outline-none transition-all placeholder:text-text-muted font-mono text-sm"
+                      placeholder="ghp_xxxxxxxxxxxx" type="password" autocomplete="off" />
+                  </div>
+                </div>
+                <div class="flex items-end">
+                  <button type="submit"
+                    class="scan-btn-main px-8 py-3.5 rounded-lg font-bold flex items-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <span class="material-icons">radar</span> START SCAN
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Azure DevOps Fields -->
+            <div class="form-fields hidden" id="azureFields">
+              <div class="space-y-4">
+                <div>
+                  <label
+                    class="block text-[10px] uppercase text-text-muted font-bold mb-2 ml-1 tracking-wider">Organization</label>
+                  <div class="relative">
+                    <span
+                      class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">business</span>
+                    <input id="azureOrg"
+                      class="w-full bg-bg-input border border-border-main rounded-lg py-3.5 pl-12 pr-4 text-text-primary focus:outline-none transition-all placeholder:text-text-muted font-mono text-sm"
+                      placeholder="https://dev.azure.com/your-org or your-org" type="text" autocomplete="off" />
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      class="block text-[10px] uppercase text-text-muted font-bold mb-2 ml-1 tracking-wider">Project</label>
+                    <div class="relative">
+                      <span
+                        class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">source</span>
+                      <input id="azureProject"
+                        class="w-full bg-bg-input border border-border-main rounded-lg py-3.5 pl-12 pr-4 text-text-primary focus:outline-none transition-all placeholder:text-text-muted font-mono text-sm"
+                        placeholder="MyProject" type="text" autocomplete="off" />
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      class="block text-[10px] uppercase text-text-muted font-bold mb-2 ml-1 tracking-wider">Repository</label>
+                    <div class="relative">
+                      <span
+                        class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">inventory_2</span>
+                      <input id="azureRepo"
+                        class="w-full bg-bg-input border border-border-main rounded-lg py-3.5 pl-12 pr-4 text-text-primary focus:outline-none transition-all placeholder:text-text-muted font-mono text-sm"
+                        placeholder="my-repo" type="text" autocomplete="off" />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[10px] uppercase text-text-muted font-bold mb-2 ml-1 tracking-wider">Personal
+                    Access
+                    Token</label>
+                  <div class="relative">
+                    <span class="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">key</span>
+                    <input id="azurePat"
+                      class="w-full bg-bg-input border border-border-main rounded-lg py-3.5 pl-12 pr-4 text-text-primary focus:outline-none transition-all placeholder:text-text-muted font-mono text-sm"
+                      placeholder="Your Azure DevOps PAT" type="password" autocomplete="off" />
+                  </div>
+                </div>
+                <div class="flex items-end">
+                  <button type="submit"
+                    class="scan-btn-main px-8 py-3.5 rounded-lg font-bold flex items-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <span class="material-icons">radar</span> START SCAN
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Progress -->
+    <section class="hidden" id="progressSection">
+      <div class="card p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="progress-spinner"></div>
+          <span id="progressText" class="text-sm font-medium text-text-secondary">Initializing scan...</span>
+        </div>
+        <div class="w-full h-1.5 bg-border-main rounded-full overflow-hidden">
+          <div id="progressBar" class="h-full bg-primary rounded-full transition-all duration-300" style="width: 0%">
+          </div>
+        </div>
+        <div class="flex justify-between mt-3 text-xs text-text-muted font-mono">
+          <span id="progressFiles">0 files scanned</span>
+          <span id="progressFindings">0 findings</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Summary Stats -->
+    <section class="hidden" id="summarySection">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="card p-5 border-l-4 border-l-primary">
+          <p class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total Findings</p>
+          <div class="flex items-end justify-between mt-2">
+            <span class="text-3xl font-extrabold text-primary font-mono" id="totalFindings">0</span>
+            <span class="material-icons text-text-muted/30">visibility</span>
+          </div>
+        </div>
+        <div class="card p-5 border-l-4 border-l-severity-critical">
+          <p class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Critical</p>
+          <div class="flex items-end justify-between mt-2">
+            <span class="text-3xl font-extrabold text-severity-critical font-mono" id="criticalCount">0</span>
+          </div>
+        </div>
+        <div class="card p-5 border-l-4 border-l-severity-high">
+          <p class="text-[10px] font-bold text-text-muted uppercase tracking-wider">High</p>
+          <div class="flex items-end justify-between mt-2">
+            <span class="text-3xl font-extrabold text-severity-high font-mono" id="highCount">0</span>
+          </div>
+        </div>
+        <div class="card p-5 border-l-4 border-l-severity-medium">
+          <p class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Medium</p>
+          <div class="flex items-end justify-between mt-2">
+            <span class="text-3xl font-extrabold text-severity-medium font-mono" id="mediumCount">0</span>
+          </div>
+        </div>
+        <div class="card p-5 border-l-4 border-l-severity-low">
+          <p class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Low</p>
+          <div class="flex items-end justify-between mt-2">
+            <span class="text-3xl font-extrabold text-severity-low font-mono" id="lowCount">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-between items-center mt-4">
+        <span class="text-xs text-text-muted font-mono" id="filesScanned"></span>
+        <button id="exportBtn"
+          class="bg-white border border-border-main px-4 py-2 rounded-lg text-xs font-semibold text-text-secondary flex items-center gap-2 hover:border-border-hover hover:text-primary transition-all">
+          <span class="material-icons text-sm">download</span> Export JSON
+        </button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="hidden" id="resultsSection">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-extrabold text-primary">
+          Findings by File
+        </h2>
+        <div class="flex gap-2">
+          <select id="severityFilter"
+            class="bg-white border border-border-main px-3 py-1.5 rounded-lg text-xs font-semibold text-text-secondary focus:outline-none focus:border-primary">
+            <option value="all">All Severities</option>
+            <option value="critical">Critical Only</option>
+            <option value="high">High & Above</option>
+            <option value="medium">Medium & Above</option>
+          </select>
+        </div>
+      </div>
+      <div id="resultsContainer" class="space-y-3"></div>
+    </section>
+
+    <!-- Empty state -->
+    <section class="hidden" id="emptySection">
+      <div class="card p-12 text-center border-green-200" style="background: rgba(34, 197, 94, 0.04);">
+        <span class="material-icons text-green-600 text-5xl mb-4">verified_user</span>
+        <h3 class="text-xl font-bold text-green-700 mb-2">No Leaks Found</h3>
+        <p class="text-sm text-green-600/70">Your project looks clean. No hardcoded credentials were detected.</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="pt-8 pb-12 border-t border-border-main flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+        <span class="text-xs text-text-muted font-medium">SecretSweep v1.0.0</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-text-muted">
+        Built for security auditing
+      </div>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

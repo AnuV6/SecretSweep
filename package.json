@@ -1,0 +1,22 @@
+{
+    "name": "secretsweep",
+    "version": "1.0.0",
+    "description": "Scan projects for hardcoded credentials, API keys, and sensitive data leaks",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "node server.js"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "simple-git": "^3.22.0"
+    },
+    "keywords": [
+        "security",
+        "credentials",
+        "leak",
+        "scanner",
+        "secrets"
+    ],
+    "license": "MIT"
+}

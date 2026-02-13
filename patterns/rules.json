@@ -1,0 +1,317 @@
+[
+    {
+        "id": "aws-access-key",
+        "name": "AWS Access Key ID",
+        "pattern": "(?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}",
+        "severity": "critical",
+        "description": "AWS Access Key ID found"
+    },
+    {
+        "id": "aws-secret-key",
+        "name": "AWS Secret Access Key",
+        "pattern": "(?:aws_secret_access_key|aws_secret_key|secret_access_key)\\s*[=:]\\s*['\"]?[A-Za-z0-9/+=]{40}['\"]?",
+        "severity": "critical",
+        "description": "AWS Secret Access Key found"
+    },
+    {
+        "id": "azure-storage-key",
+        "name": "Azure Storage Account Key",
+        "pattern": "DefaultEndpointsProtocol=https?;AccountName=[^;]+;AccountKey=[A-Za-z0-9+/=]{88};",
+        "severity": "critical",
+        "description": "Azure Storage connection string with account key"
+    },
+    {
+        "id": "azure-conn-string",
+        "name": "Azure Connection String",
+        "pattern": "(?:AccountKey|SharedAccessKey)=[A-Za-z0-9+/=]{40,}",
+        "severity": "critical",
+        "description": "Azure connection string with embedded key"
+    },
+    {
+        "id": "azure-devops-pat",
+        "name": "Azure DevOps PAT",
+        "pattern": "(?:azure[_-]?devops[_-]?pat|ado[_-]?pat|vsts[_-]?token)\\s*[=:]\\s*['\"]?[a-z0-9]{52}['\"]?",
+        "severity": "critical",
+        "description": "Azure DevOps Personal Access Token"
+    },
+    {
+        "id": "azure-ad-secret",
+        "name": "Azure AD Client Secret",
+        "pattern": "(?:client[_-]?secret|azure[_-]?ad[_-]?secret)\\s*[=:]\\s*['\"]?[A-Za-z0-9~._-]{34,}['\"]?",
+        "severity": "critical",
+        "description": "Azure AD client secret"
+    },
+    {
+        "id": "azure-sas-token",
+        "name": "Azure SAS Token",
+        "pattern": "\\?sv=\\d{4}-\\d{2}-\\d{2}&[^\\s\"']+sig=[A-Za-z0-9%+/=]+",
+        "severity": "high",
+        "description": "Azure Shared Access Signature (SAS) token"
+    },
+    {
+        "id": "gcp-service-account",
+        "name": "GCP Service Account Key",
+        "pattern": "\"type\"\\s*:\\s*\"service_account\"",
+        "severity": "critical",
+        "description": "Google Cloud Platform service account JSON key file"
+    },
+    {
+        "id": "gcp-api-key",
+        "name": "GCP API Key",
+        "pattern": "AIza[0-9A-Za-z_-]{35}",
+        "severity": "high",
+        "description": "Google Cloud API key"
+    },
+    {
+        "id": "gcp-oauth-secret",
+        "name": "GCP OAuth Client Secret",
+        "pattern": "(?:client_secret)\\s*[=:]\\s*['\"]?GOCSPX-[A-Za-z0-9_-]{28}['\"]?",
+        "severity": "critical",
+        "description": "Google OAuth client secret"
+    },
+    {
+        "id": "github-pat",
+        "name": "GitHub Personal Access Token",
+        "pattern": "ghp_[A-Za-z0-9_]{36}",
+        "severity": "critical",
+        "description": "GitHub Personal Access Token (classic)"
+    },
+    {
+        "id": "github-fine-grained",
+        "name": "GitHub Fine-Grained Token",
+        "pattern": "github_pat_[A-Za-z0-9_]{82}",
+        "severity": "critical",
+        "description": "GitHub Fine-Grained Personal Access Token"
+    },
+    {
+        "id": "github-oauth",
+        "name": "GitHub OAuth Token",
+        "pattern": "gho_[A-Za-z0-9_]{36}",
+        "severity": "critical",
+        "description": "GitHub OAuth Access Token"
+    },
+    {
+        "id": "gitlab-pat",
+        "name": "GitLab Personal Access Token",
+        "pattern": "glpat-[A-Za-z0-9_-]{20}",
+        "severity": "critical",
+        "description": "GitLab Personal Access Token"
+    },
+    {
+        "id": "stripe-secret",
+        "name": "Stripe Secret Key",
+        "pattern": "sk_live_[A-Za-z0-9]{24,}",
+        "severity": "critical",
+        "description": "Stripe live secret API key"
+    },
+    {
+        "id": "stripe-publishable",
+        "name": "Stripe Publishable Key",
+        "pattern": "pk_live_[A-Za-z0-9]{24,}",
+        "severity": "medium",
+        "description": "Stripe live publishable API key"
+    },
+    {
+        "id": "twilio-api-key",
+        "name": "Twilio API Key",
+        "pattern": "SK[a-f0-9]{32}",
+        "severity": "high",
+        "description": "Twilio API Key"
+    },
+    {
+        "id": "sendgrid-api-key",
+        "name": "SendGrid API Key",
+        "pattern": "SG\\.[A-Za-z0-9_-]{22}\\.[A-Za-z0-9_-]{43}",
+        "severity": "critical",
+        "description": "SendGrid API key"
+    },
+    {
+        "id": "slack-webhook",
+        "name": "Slack Webhook URL",
+        "pattern": "https://hooks\\.slack\\.com/services/T[A-Za-z0-9_]+/B[A-Za-z0-9_]+/[A-Za-z0-9_]+",
+        "severity": "high",
+        "description": "Slack incoming webhook URL"
+    },
+    {
+        "id": "slack-token",
+        "name": "Slack Bot/User Token",
+        "pattern": "xox[bporas]-[A-Za-z0-9-]{10,250}",
+        "severity": "critical",
+        "description": "Slack API token"
+    },
+    {
+        "id": "discord-webhook",
+        "name": "Discord Webhook URL",
+        "pattern": "https://discord(?:app)?\\.com/api/webhooks/\\d+/[A-Za-z0-9_-]+",
+        "severity": "high",
+        "description": "Discord webhook URL"
+    },
+    {
+        "id": "discord-bot-token",
+        "name": "Discord Bot Token",
+        "pattern": "[MN][A-Za-z0-9]{23,}\\.[A-Za-z0-9_-]{6}\\.[A-Za-z0-9_-]{27,}",
+        "severity": "critical",
+        "description": "Discord bot token"
+    },
+    {
+        "id": "jwt-token",
+        "name": "JSON Web Token",
+        "pattern": "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}",
+        "severity": "high",
+        "description": "JSON Web Token (JWT) found hardcoded"
+    },
+    {
+        "id": "rsa-private-key",
+        "name": "RSA Private Key",
+        "pattern": "-----BEGIN RSA PRIVATE KEY-----",
+        "severity": "critical",
+        "description": "RSA private key file content"
+    },
+    {
+        "id": "openssh-private-key",
+        "name": "OpenSSH Private Key",
+        "pattern": "-----BEGIN OPENSSH PRIVATE KEY-----",
+        "severity": "critical",
+        "description": "OpenSSH private key file content"
+    },
+    {
+        "id": "pgp-private-key",
+        "name": "PGP Private Key",
+        "pattern": "-----BEGIN PGP PRIVATE KEY BLOCK-----",
+        "severity": "critical",
+        "description": "PGP private key block"
+    },
+    {
+        "id": "ec-private-key",
+        "name": "EC Private Key",
+        "pattern": "-----BEGIN EC PRIVATE KEY-----",
+        "severity": "critical",
+        "description": "Elliptic curve private key"
+    },
+    {
+        "id": "generic-private-key",
+        "name": "Generic Private Key",
+        "pattern": "-----BEGIN PRIVATE KEY-----",
+        "severity": "critical",
+        "description": "Generic private key (PKCS#8)"
+    },
+    {
+        "id": "mssql-connection",
+        "name": "SQL Server Connection String",
+        "pattern": "(?:Server|Data Source)=[^;]+;.*(?:Password|Pwd)=[^;]+",
+        "severity": "critical",
+        "description": "SQL Server connection string with password"
+    },
+    {
+        "id": "mysql-connection",
+        "name": "MySQL Connection String",
+        "pattern": "mysql://[^:]+:[^@]+@[^/]+",
+        "severity": "critical",
+        "description": "MySQL connection string with credentials"
+    },
+    {
+        "id": "postgres-connection",
+        "name": "PostgreSQL Connection String",
+        "pattern": "postgres(?:ql)?://[^:]+:[^@]+@[^/]+",
+        "severity": "critical",
+        "description": "PostgreSQL connection string with credentials"
+    },
+    {
+        "id": "mongodb-connection",
+        "name": "MongoDB Connection String",
+        "pattern": "mongodb(?:\\+srv)?://[^:]+:[^@]+@[^\\s\"']+",
+        "severity": "critical",
+        "description": "MongoDB connection string with credentials"
+    },
+    {
+        "id": "redis-connection",
+        "name": "Redis Connection String",
+        "pattern": "redis://[^:]*:[^@]+@[^\\s\"']+",
+        "severity": "critical",
+        "description": "Redis connection URL with password"
+    },
+    {
+        "id": "generic-password",
+        "name": "Hardcoded Password",
+        "pattern": "(?:password|passwd|pwd|secret)\\s*[=:]\\s*['\"][^'\"]{8,}['\"]",
+        "severity": "high",
+        "description": "Possible hardcoded password in assignment"
+    },
+    {
+        "id": "generic-api-key",
+        "name": "Generic API Key",
+        "pattern": "(?:api[_-]?key|apikey|api[_-]?secret)\\s*[=:]\\s*['\"][A-Za-z0-9_\\-/.+={} ]{16,}['\"]",
+        "severity": "high",
+        "description": "Generic API key assignment"
+    },
+    {
+        "id": "generic-secret",
+        "name": "Generic Secret",
+        "pattern": "(?:client[_-]?secret|app[_-]?secret|auth[_-]?secret|signing[_-]?secret)\\s*[=:]\\s*['\"][^'\"]{8,}['\"]",
+        "severity": "high",
+        "description": "Generic secret value assignment"
+    },
+    {
+        "id": "generic-token",
+        "name": "Generic Token",
+        "pattern": "(?:access[_-]?token|auth[_-]?token|bearer[_-]?token)\\s*[=:]\\s*['\"][A-Za-z0-9_\\-/.+=]{20,}['\"]",
+        "severity": "high",
+        "description": "Hardcoded access/auth token"
+    },
+    {
+        "id": "bearer-header",
+        "name": "Bearer Auth Header",
+        "pattern": "['\"]Bearer\\s+[A-Za-z0-9_\\-/.+=]{20,}['\"]",
+        "severity": "high",
+        "description": "Hardcoded Bearer authorization header"
+    },
+    {
+        "id": "basic-auth-header",
+        "name": "Basic Auth Header",
+        "pattern": "['\"]Basic\\s+[A-Za-z0-9+/=]{20,}['\"]",
+        "severity": "high",
+        "description": "Hardcoded Basic authorization header"
+    },
+    {
+        "id": "npm-token",
+        "name": "NPM Access Token",
+        "pattern": "//registry\\.npmjs\\.org/:_authToken=[A-Za-z0-9_-]+",
+        "severity": "critical",
+        "description": "NPM registry authentication token"
+    },
+    {
+        "id": "docker-auth",
+        "name": "Docker Registry Auth",
+        "pattern": "\"auth\"\\s*:\\s*\"[A-Za-z0-9+/=]{20,}\"",
+        "severity": "high",
+        "description": "Docker registry authentication credential"
+    },
+    {
+        "id": "firebase-key",
+        "name": "Firebase API Key",
+        "pattern": "(?:firebase|FIREBASE).*['\"][A-Za-z0-9_-]{39}['\"]",
+        "severity": "high",
+        "description": "Firebase API key"
+    },
+    {
+        "id": "mailgun-api-key",
+        "name": "Mailgun API Key",
+        "pattern": "key-[A-Za-z0-9]{32}",
+        "severity": "high",
+        "description": "Mailgun API key"
+    },
+    {
+        "id": "private-ip",
+        "name": "Private IP Address",
+        "pattern": "(?:10\\.\\d{1,3}|172\\.(?:1[6-9]|2\\d|3[01])|192\\.168)\\.\\d{1,3}\\.\\d{1,3}",
+        "severity": "low",
+        "description": "Private/internal IP address exposed"
+    },
+    {
+        "id": "env-file-ref",
+        "name": "Environment Variable in Code",
+        "pattern": "(?:DOTENV|dotenv|require\\(['\"]dotenv['\"]\\))",
+        "severity": "low",
+        "description": "Direct dotenv reference (check for .env file in repo)"
+    }
+]
